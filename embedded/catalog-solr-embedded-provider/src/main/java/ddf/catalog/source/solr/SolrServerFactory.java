@@ -25,7 +25,6 @@ import java.net.URL;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
@@ -34,6 +33,8 @@ import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.schema.IndexSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -52,7 +53,7 @@ public final class SolrServerFactory {
 
     private static final String DEFAULT_SOLR_XML = "solr.xml";
 
-    private static final Logger LOGGER = Logger.getLogger(SolrServerFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SolrServerFactory.class);
 
     public static final String CORE_NAME = "core1";
 
@@ -107,8 +108,7 @@ public final class SolrServerFactory {
     public static EmbeddedSolrServer getEmbeddedSolrServer(String solrConfigXml, String schemaXml,
             ConfigurationFileProxy givenConfigFileProxy) {
 
-        LOGGER.debug("Retrieving embedded solr with the following properties: [" + solrConfigXml
-                + "," + schemaXml + "," + givenConfigFileProxy + "]");
+        LOGGER.debug("Retrieving embedded solr with the following properties: [{}],{},{}]", solrConfigXml, schemaXml, givenConfigFileProxy);
 
         String solrConfigFileName = DEFAULT_SOLRCONFIG_XML;
         String schemaFileName = DEFAULT_SCHEMA_XML;
@@ -150,11 +150,11 @@ public final class SolrServerFactory {
             indexSchema = new IndexSchema(solrConfig, schemaFileName, new InputSource(
                     FileUtils.openInputStream(solrSchemaFile)));
         } catch (ParserConfigurationException e) {
-            LOGGER.warn(e);
+            LOGGER.warn("Parser exception while building config", e);
         } catch (IOException e) {
-            LOGGER.warn(e);
+            LOGGER.warn("IO exception while building config", e);
         } catch (SAXException e) {
-            LOGGER.warn(e);
+            LOGGER.warn("SAX exception while building config", e);
         } finally {
             Thread.currentThread().setContextClassLoader(tccl);
         }
@@ -165,7 +165,7 @@ public final class SolrServerFactory {
                 .getResourceLoader().getInstanceDir());
 
         File dataDir = configProxy.getDataDirectory();
-        LOGGER.debug("Using data directory [" + dataDir + "]");
+        LOGGER.debug("Using data directory [{}]", dataDir);
         SolrCore core = new SolrCore(CORE_NAME, dataDir.getAbsolutePath(), solrConfig, indexSchema,
                 coreDescriptor);
         container.register(CORE_NAME, core, false);
@@ -179,7 +179,7 @@ public final class SolrServerFactory {
             URL url = configProxy.getResource(configFileName);
             result = new File(new URI(url.toString()).getPath());
         } catch (URISyntaxException e) {
-            LOGGER.warn(e);
+            LOGGER.warn("URI exception while getting config file", e);
         }
         return result;
     }

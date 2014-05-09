@@ -14,7 +14,8 @@
  **/
 package ddf.catalog.source.solr;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.Geometry;
@@ -25,7 +26,7 @@ import com.vividsolutions.jts.io.WKTReader;
 
 public class WktNormalizer {
 
-    private static final Logger LOGGER = Logger.getLogger(WktNormalizer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WktNormalizer.class);
 
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
@@ -54,7 +55,7 @@ public class WktNormalizer {
         try {
             geo = reader.read(wkt);
         } catch (ParseException e) {
-            LOGGER.info("Failed to read WKT: " + wkt, e);
+            LOGGER.info("Failed to read WKT: {}", wkt, e);
         }
 
         return geo;
